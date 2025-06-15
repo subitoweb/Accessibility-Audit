@@ -1,0 +1,55 @@
+name: Accessibility Audit
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  pa11y:
+    name: Pa11y WCAG Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Pa11y
+        run: npm install -g pa11y
+
+      - name: Run Pa11y against homepage
+        run: |
+          pa11y https://example.com \
+            --reporter html \
+            --threshold 2 \
+            > pa11y-report.html
+
+      - name: Upload Pa11y report
+        uses: actions/upload-artifact@v3
+        with:
+          name: pa11y-report
+          path: pa11y-report.html
+
+  axe:
+    name: axe-cli WCAG Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install axe-cli
+        run: npm install -g @axe-core/cli
+
+      - name: Run axe-cli against homepage
+        run: |
+          npx axe https://example.com --save results.json
+
+      - name: Upload axe report
+        uses: actions/upload-artifact@v3
+        with:
+          name: axe-report
+          path: results.json
